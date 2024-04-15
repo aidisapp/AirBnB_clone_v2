@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Test Module for the amenities class """
+"""Test Module for the amenities class"""
 
 from datetime import datetime
 from unittest.mock import patch
