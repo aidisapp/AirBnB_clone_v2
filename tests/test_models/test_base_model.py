@@ -4,10 +4,9 @@
 import os
 import unittest
 import datetime
-from uuid import UUID
 import json
-import pycodestyle
 import inspect
+import pycodestyle
 from models.base_model import BaseModel
 
 
@@ -39,7 +38,7 @@ class test_basemodel(unittest.TestCase):
     def tearDown(self):
         try:
             os.remove('file.json')
-        except:
+        except ImportError:
             pass
 
     def test_default(self):
