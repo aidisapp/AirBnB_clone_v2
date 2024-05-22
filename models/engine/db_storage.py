@@ -1,9 +1,8 @@
 #!/usr/bin/python3
-""" new class for sqlAlchemy """
+"""This is a new class for sqlAlchemy"""
 from os import getenv
-from ast import literal_eval
 from sqlalchemy.orm import sessionmaker, scoped_session
-from sqlalchemy import (create_engine)
+from sqlalchemy import create_engine
 from models.base_model import Base
 from models.state import State
 from models.city import City
@@ -12,13 +11,17 @@ from models.place import Place
 from models.review import Review
 from models.amenity import Amenity
 
+classes = {"Amenity": Amenity, "City": City, "Place": Place,
+           "Review": Review, "State": State, "User": User}
+
 
 class DBStorage:
-    """ create tables in environmental"""
+    """Interacts with the MySQL database"""
     __engine = None
     __session = None
 
     def __init__(self):
+        """Instantiate a DBStorage object"""
         user = getenv("HBNB_MYSQL_USER")
         passwd = getenv("HBNB_MYSQL_PWD")
         db = getenv("HBNB_MYSQL_DB")
@@ -28,61 +31,40 @@ class DBStorage:
         self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'
                                       .format(user, passwd, host, db),
                                       pool_pre_ping=True)
-
         if env == "test":
             Base.metadata.drop_all(self.__engine)
 
     def all(self, cls=None):
-        """
-        Returns a dictionary
-        """
-        dic = {}
-        if cls:
-            if type(cls) is str:
-                cls = literal_eval(cls)
-            query = self.__session.query(cls)
-            for elem in query:
-                key = "{}.{}".format(type(elem).__name__, elem.id)
-                dic[key] = elem
-        else:
-            lista = [State, City, User, Place, Review, Amenity]
-            for clase in lista:
-                query = self.__session.query(clase)
-                for elem in query:
-                    key = "{}.{}".format(type(elem).__name__, elem.id)
-                    dic[key] = elem
-        return (dic)
+        """Query on the current database session"""
+        new_dict = {}
+        for clss in classes:
+            if cls is None or cls is classes[clss] or cls == clss:
+                objs = self.__session.query(classes[clss]).all()
+                for obj in objs:
+                    key = obj.__class__.__name__ + '.' + obj.id
+                    new_dict[key] = obj
+        return new_dict
 
     def new(self, obj):
-        """
-        Add a new element in the table
-        """
+        """Add the object to the current database session"""
         self.__session.add(obj)
 
     def save(self):
-        """
-        Save changes
-        """
+        """Commit all changes of the current database session"""
         self.__session.commit()
 
     def delete(self, obj=None):
-        """delete an element in the table
-        """
+        """Delete from the current database session obj if not None"""
         if obj:
-            self.session.delete(obj)
+            self.__session.delete(obj)
 
     def reload(self):
-        """
-        DB Configuration
-        """
+        """Reloads data from the database"""
         Base.metadata.create_all(self.__engine)
-        sec = sessionmaker(bind=self.__engine, expire_on_commit=False)
-        Session = scoped_session(sec)
+        sess_factory = sessionmaker(bind=self.__engine, expire_on_commit=False)
+        Session = scoped_session(sess_factory)
         self.__session = Session()
 
     def close(self):
-        """
-        Close connection to the session
-        Calls remove()
-        """
-        self.__session.close()
+        """Call remove() method on the private session attribute"""
+        self.__session.remove()
