@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""This is a new class for sqlAlchemy"""
+""" new class for sqlAlchemy """
 from os import getenv
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy import create_engine
@@ -11,8 +11,10 @@ from models.place import Place
 from models.review import Review
 from models.amenity import Amenity
 
-classes = {"Amenity": Amenity, "City": City, "Place": Place,
-           "Review": Review, "State": State, "User": User}
+
+classes = {"Amenity": Amenity, "City": City,
+           "Place": Place, "Review": Review,
+           "State": State, "User": User}
 
 
 class DBStorage:
